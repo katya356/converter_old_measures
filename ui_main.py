@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import (
+rom PyQt5.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QFormLayout,
     QComboBox, QDoubleSpinBox, QPushButton, QLabel,
     QMessageBox, QFileDialog
@@ -8,13 +8,15 @@ from PyQt5.QtGui import QPixmap
 from PIL import Image
 import io
 import database
+import logging
+logger = logging.getLogger(__name__)
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Конвертер старых мер")
-        self.setMinimumSize(400, 300)
-        self.resize(500, 400)
+        self.setMinimumSize(800, 600)
+        self.resize(900, 650)
 
         self.db = database.DatabaseManager()
         self.db.init_db()
@@ -93,7 +95,9 @@ class MainWindow(QMainWindow):
             result = base_value / self.coeffs[to_unit]
             self.lbl_result.setText(f"Результат: {result:.4f}")
             self.db.insert_record(from_unit, value, to_unit, result)
+            logger.info(f"Конвертация: {value} {from_unit} → {result:.4f} {to_unit}")
         except Exception as e:
+            logger.error(f"Ошибка конвертации: {e}")
             QMessageBox.critical(self, "Ошибка", f"Что-то пошло не так: {e}")
 
     def _load_image(self):
@@ -112,7 +116,9 @@ class MainWindow(QMainWindow):
                 pixmap.loadFromData(byte_arr.read(), 'PNG')
                 self.lbl_image.setPixmap(pixmap)
                 self.lbl_image.setStyleSheet("background-color: #fff; border: 2px solid #999; border-radius: 8px;")
+                logger.info(f"Загружено изображение: {path}")
             except Exception as e:
+                logger.error(f"Ошибка загрузки изображения: {e}")
                 QMessageBox.critical(self, "Ошибка", f"Не удалось загрузить: {e}")
 
     def closeEvent(self, event):
@@ -123,6 +129,7 @@ class MainWindow(QMainWindow):
         )
         if reply == QMessageBox.Yes:
             self.db.close()
+            logger.info("Приложение закрыто")
             event.accept()
         else:
             event.ignore()
