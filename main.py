@@ -1,8 +1,18 @@
 import sys
+import logging
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QFont
 from ui_main import MainWindow
 
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler("app.log"),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
 def main():
     app = QApplication(sys.argv)
     app.setApplicationName("Конвертер старых мер")
